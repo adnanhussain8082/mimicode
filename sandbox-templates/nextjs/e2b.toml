@@ -1,0 +1,17 @@
+# This is a config for E2B sandbox template.
+# You can use template ID (fid6xucc9pi4b0uhz77w) or template name (mimicode-nextjs-test) to create a sandbox:
+
+# Python SDK
+# from e2b import Sandbox, AsyncSandbox
+# sandbox = Sandbox.create("mimicode-nextjs-test") # Sync sandbox
+# sandbox = await AsyncSandbox.create("mimicode-nextjs-test") # Async sandbox
+
+# JS SDK
+# import { Sandbox } from 'e2b'
+# const sandbox = await Sandbox.create('mimicode-nextjs-test')
+
+team_id = "fdfb5147-4812-4b59-8422-db2590e8b417"
+start_cmd = "/compile_page.sh"
+dockerfile = "e2b.Dockerfile"
+template_name = "mimicode-nextjs-test"
+template_id = "fid6xucc9pi4b0uhz77w"

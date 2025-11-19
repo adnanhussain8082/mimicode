@@ -1,17 +1,37 @@
+import { openai, createAgent } from "@inngest/agent-kit";
+import { Sandbox } from "@e2b/code-interpreter"
 import { inngest } from "./client";
+import { getSandbox } from "./utils";
 
 export const helloWorld = inngest.createFunction(
-  { id: "hello-world" },
+  { id: "hello-world", retries: 0 },
   { event: "test/hello.world" },
-  async ({ event, step }) => {
-    //imagine this is a download step
-    await step.sleep("wait-a-moment", "30s");
+  async ({ event , step }) => {
 
-    //imagine this is a transcript step
-    await step.sleep("wait-a-moment", "10s");
+    const sandboxId = await step.run("get-sandbox-id" , async () => {
+      const sandbox = await Sandbox.create("mimicode-nextjs-test");
+      return sandbox.sandboxId;
+    } );
 
-    //imagine this is a summary step
-    await step.sleep("wait-a-moment", "5s");
-    return { message: `Hello ${event.data.email}!` };
-  },
+    const codeAgent = createAgent({
+      name: "code-agent",
+      system: "You are an expert next.js developer. You write readable, maintainable code. You write simple next.js and react snippets",
+      model: openai({
+        model: "gpt-4o",      // <-- FINAL correct name
+        apiKey: process.env.OPENAI_API_KEY,  // or direct string
+      }),
+    });
+
+    const { output } = await codeAgent.run(
+      `write the following snippet: ${event.data.value}`
+    );
+
+    const sandboxUrl = await step.run("get-sandbox-url" , async () =>{
+      const sandbox = await getSandbox(sandboxId);
+      const host = sandbox.getHost(3000); 
+      return `https://${host}`;
+    })
+
+    return { output , sandboxUrl };
+  }
 );
