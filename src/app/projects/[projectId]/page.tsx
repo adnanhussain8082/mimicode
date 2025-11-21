@@ -16,11 +16,19 @@ async function ProjectPage({ params }: Props) {
       projectId,
     })
   );
-  void queryClient.prefetchQuery(
-    trpc.projects.getOne.queryOptions({
-      id: projectId,
-    })
-  );
+  try {
+    void queryClient.prefetchQuery(
+      trpc.projects.getOne.queryOptions({
+        id: projectId,
+      })
+    );
+  } catch (err: any) {
+    // If the project is not found, render a simple not-found UI
+    if (err?.code === "NOT_FOUND" || err?.message?.includes("Project not found")) {
+      return <div className="p-4">Project not found</div>;
+    }
+    throw err;
+  }
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
       <Suspense fallback={<p>Loading...</p>}>

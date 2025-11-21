@@ -23,6 +23,11 @@ export const projectsRouter = createTRPCRouter({
       const project = await prisma.project.findUnique({
         where: { id: input.id },
       });
+      if (!project) {
+        // Throw a TRPC-friendly not found error so callers can handle 404s
+        const { TRPCError } = await import("@trpc/server");
+        throw new TRPCError({ code: "NOT_FOUND", message: "Project not found" });
+      }
       return project;
     }),
   create: baseProcedure
