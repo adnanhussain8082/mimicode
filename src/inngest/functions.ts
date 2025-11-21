@@ -24,7 +24,7 @@ export const codeAgentFunction = inngest.createFunction(
   { event: "code-agent/run" },
   async ({ event, step }) => {
     const sandboxId = await step.run("get-sandbox-id", async () => {
-      const sandbox = await Sandbox.create("vibe-nextjs-jai");
+      const sandbox = await Sandbox.create("mimicode-nextjs-test");
       return sandbox.sandboxId;
     });
     const codeAgent = createAgent<AgentState>({

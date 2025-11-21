@@ -13,6 +13,18 @@ export const projectsRouter = createTRPCRouter({
     });
     return projects;
   }),
+  getOne: baseProcedure
+    .input(
+      z.object({
+        id: z.string().uuid(),
+      })
+    )
+    .query(async ({ input }) => {
+      const project = await prisma.project.findUnique({
+        where: { id: input.id },
+      });
+      return project;
+    }),
   create: baseProcedure
     .input(
       z.object({
