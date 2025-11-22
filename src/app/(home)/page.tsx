@@ -8,12 +8,12 @@ function HomePage() {
       <section className="space-y-6 py-[16vh] 2xl:py-48">
         <div className="flex flex-col items-center">
           <Image
-            src={'/logo.svg'}
+            src={"/logo.svg"}
             alt="Promptly"
             width={50}
             height={50}
             className="hidden md:block"
-          />
+          ></Image>
         </div>
         <h1 className="text-2xl md:text-5xl font-bold text-center">
           Build something with promptly
@@ -22,12 +22,11 @@ function HomePage() {
           Create apps and websites by chatting with AI
         </p>
         <div className="max-w-3xl mx-auto w-full">
-          <ProjectForm />
+          <ProjectForm></ProjectForm>
         </div>
       </section>
-      <ProjectsList />
+      <ProjectsList></ProjectsList>
     </div>
   );
 }
-
 export default HomePage;
