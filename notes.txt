@@ -8,6 +8,7 @@ npx prisma generate
 
 
 logoipsum---> to get the website logo
+tweakcn.com for ui theme
 
 
 
