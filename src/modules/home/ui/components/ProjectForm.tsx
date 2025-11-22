@@ -22,11 +22,7 @@ const formSchema = z.object({
     .max(10000, { message: "Value is too long" }),
 });
 
-interface ProjectFormProps {
-  onSubmit?: () => void;
-}
-
-function ProjectForm({ onSubmit: onSubmitSuccess }: ProjectFormProps) {
+function ProjectForm() {
   const router = useRouter();
   const trpc = useTRPC();
   const queryClient = useQueryClient();
@@ -42,15 +38,17 @@ function ProjectForm({ onSubmit: onSubmitSuccess }: ProjectFormProps) {
     trpc.projects.create.mutationOptions({
       onSuccess: (data) => {
         queryClient.invalidateQueries(trpc.projects.getMany.queryOptions());
-        onSubmitSuccess?.();
         router.push(`/projects/${data.id}`);
-        // TODO: invalidate usage status
+        queryClient.invalidateQueries(trpc.usage.status.queryOptions());
       },
       onError: (error) => {
+        if (error?.data?.code === "TOO_MANY_REQUESTS") {
+          router.push("/pricing");
+        }
         if (error?.data?.code === "UNAUTHORIZED") {
           router.push("/sign-in");
         }
-        // TODO: redirect to pricing page if specific error
+
         toast.error(error.message);
       },
     })
