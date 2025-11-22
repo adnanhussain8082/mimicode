@@ -18,8 +18,8 @@ const ShimmerMessages = () => {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setCurrentMessagesIndex((prev) => (prev += 1) & messages.length);
-    }, 2000);
+      setCurrentMessagesIndex((prev) => (prev + 1) % messages.length);
+    }, 5000);
     return () => clearInterval(interval);
   }, [messages.length]);
 
@@ -38,12 +38,12 @@ function MessageLoading() {
       <div className="flex items-center gap-2 pl-2 mb-2">
         <Image
           src={"/logo.svg"}
-          alt="Promptly"
+          alt="Vibe"
           height={18}
           width={18}
           className="shrink-0"
         ></Image>
-        <span className="text-sm font-medium">Promptly</span>
+        <span className="text-sm font-medium">Vibe</span>
       </div>
       <div className="pl-8.5 flex flex-col gap-y-4">
         <ShimmerMessages></ShimmerMessages>
