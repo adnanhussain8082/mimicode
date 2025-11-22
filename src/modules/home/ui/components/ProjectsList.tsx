@@ -18,7 +18,7 @@ function ProjectsList() {
 
   return (
     <div className="p-8 border rounded-xl flex flex-col gap-y-6 w-full bg-white dark:bg-sidebar">
-      <h2 className="text-2xl font-semibold">{user?.firstName}&apos;s Vibes</h2>
+      <h2 className="text-2xl font-semibold">{user?.firstName}&apos;s Projects</h2>
       <div className="grid grid-cols 1 sml;grid-cols-3 gap-6">
         {projects?.length === 0 && (
           <div className="col-span-full text-center">
@@ -37,7 +37,7 @@ function ProjectsList() {
                 <div className="flex items-center gap-x-4">
                   <Image
                     src={"/logo.svg"}
-                    alt="Vibe"
+                    alt="Promptly"
                     width={32}
                     height={32}
                     className="object-contain"

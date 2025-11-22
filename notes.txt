@@ -15,3 +15,14 @@ tweakcn.com for ui theme
 npm i -D @types/prismjs
 npm install prismjs
 
+
+
+i will now move forward with other things that i have to do to move forward with this project
+
+and i would again copy and paste code from other repo which would again mess up the already set things like those enter-submit button thing and may also mess up the nav bar thing and might just mess up with other things too 
+i just wanted to let you know this would happen in advance so when i finish doing those things you would have the context of what i am saying
+
+so at that moment when i finish up those things i would say the sentence:
+"correct those things again" this particular sentence and you would again set up the above things correctly 
+once again keep the context of above sentence with you and when i would say you would do the above thing
+

@@ -4,6 +4,7 @@ import {prisma} from "@/lib/db";
 import { protectedProcedure, createTRPCRouter } from "@/trpc/init";
 import z from "zod";
 import { TRPCError } from "@trpc/server";
+import { consumeCredits } from "@/lib/usage";
 
 export const projectsRouter = createTRPCRouter({
   getOne: protectedProcedure
@@ -48,6 +49,22 @@ export const projectsRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ input, ctx }) => {
+      try {
+        await consumeCredits();
+      } catch (err: any) {
+        // Check if it's a RateLimiter error (insufficient points)
+        if (err?.message?.includes("insufficient points")) {
+          throw new TRPCError({
+            code: "TOO_MANY_REQUESTS",
+            message: "You have run out of credits",
+          });
+        }
+        // Other errors
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: err?.message || "Something went wrong",
+        });
+      }
       const createdProject = await prisma.project.create({
         data: {
           userId: ctx.auth.userId,
