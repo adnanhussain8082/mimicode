@@ -1,36 +1,44 @@
 import { inngest } from "@/inngest/client";
 import { generateSlug } from "random-word-slugs";
 import {prisma} from "@/lib/db";
-import { baseProcedure, createTRPCRouter } from "@/trpc/init";
+import { protectedProcedure, createTRPCRouter } from "@/trpc/init";
 import z from "zod";
+import { TRPCError } from "@trpc/server";
 
 export const projectsRouter = createTRPCRouter({
-  getMany: baseProcedure.query(async () => {
+  getOne: protectedProcedure
+    .input(
+      z.object({
+        id: z.string().min(1, { message: "Id is required" }),
+      })
+    )
+    .query(async ({ input, ctx }) => {
+      const existingProject = await prisma.project.findUnique({
+        where: {
+          id: input.id,
+          userId: ctx.auth.userId,
+        },
+      });
+      if (!existingProject) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Project not found",
+        });
+      }
+      return existingProject;
+    }),
+  getMany: protectedProcedure.query(async ({ ctx }) => {
     const projects = await prisma.project.findMany({
+      where: {
+        userId: ctx.auth.userId,
+      },
       orderBy: {
         updatedAt: "desc",
       },
     });
     return projects;
   }),
-  getOne: baseProcedure
-    .input(
-      z.object({
-        id: z.string().uuid(),
-      })
-    )
-    .query(async ({ input }) => {
-      const project = await prisma.project.findUnique({
-        where: { id: input.id },
-      });
-      if (!project) {
-        // Throw a TRPC-friendly not found error so callers can handle 404s
-        const { TRPCError } = await import("@trpc/server");
-        throw new TRPCError({ code: "NOT_FOUND", message: "Project not found" });
-      }
-      return project;
-    }),
-  create: baseProcedure
+  create: protectedProcedure
     .input(
       z.object({
         value: z
@@ -39,9 +47,10 @@ export const projectsRouter = createTRPCRouter({
           .max(10000, { message: "Value is too long" }),
       })
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
       const createdProject = await prisma.project.create({
         data: {
+          userId: ctx.auth.userId,
           name: generateSlug(2, {
             format: "kebab",
           }),

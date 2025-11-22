@@ -12,7 +12,7 @@ import { useTRPC } from "@/trpc/client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { PROJECT_TEMPLATES } from "./constants";
+import { PROJECT_TEMPLATES } from "../../constants";
 import { Button } from "@/components/ui/button";
 
 const formSchema = z.object({
@@ -22,10 +22,15 @@ const formSchema = z.object({
     .max(10000, { message: "Value is too long" }),
 });
 
-function ProjectForm() {
+interface ProjectFormProps {
+  onSubmit?: () => void;
+}
+
+function ProjectForm({ onSubmit: onSubmitSuccess }: ProjectFormProps) {
   const router = useRouter();
   const trpc = useTRPC();
   const queryClient = useQueryClient();
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -37,10 +42,14 @@ function ProjectForm() {
     trpc.projects.create.mutationOptions({
       onSuccess: (data) => {
         queryClient.invalidateQueries(trpc.projects.getMany.queryOptions());
+        onSubmitSuccess?.();
         router.push(`/projects/${data.id}`);
         // TODO: invalidate usage status
       },
       onError: (error) => {
+        if (error?.data?.code === "UNAUTHORIZED") {
+          router.push("/sign-in");
+        }
         // TODO: redirect to pricing page if specific error
         toast.error(error.message);
       },
@@ -88,7 +97,6 @@ function ProjectForm() {
                 className="pt-4 resize-none border-none w-full outline-none bg-transparent"
                 placeholder="What would you like to build?"
                 onKeyDown={(e) => {
-                  // Submit on Enter (without Shift). Allow Shift+Enter to insert a newline.
                   if (e.key === "Enter" && !e.shiftKey) {
                     e.preventDefault();
                     form.handleSubmit(onSubmit)(e);
