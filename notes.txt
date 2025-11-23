@@ -3,6 +3,8 @@ npx inngest-cli@latest dev
 npx prisma migrate reset
 npx prisma migrate dev
 
+mimicode-nextjs-test
+
 npx prisma studio
 npx prisma generate
 

@@ -90,4 +90,66 @@ export const projectsRouter = createTRPCRouter({
       });
       return createdProject;
     }),
+  sendMessage: protectedProcedure
+    .input(
+      z.object({
+        projectId: z.string().min(1, { message: "ProjectId is required" }),
+        value: z
+          .string()
+          .min(1, { message: "Value is required" })
+          .max(10000, { message: "Value is too long" }),
+      })
+    )
+    .mutation(async ({ input, ctx }) => {
+      // Verify the project belongs to the user
+      const project = await prisma.project.findUnique({
+        where: {
+          id: input.projectId,
+          userId: ctx.auth.userId,
+        },
+      });
+
+      if (!project) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Project not found",
+        });
+      }
+
+      try {
+        await consumeCredits();
+      } catch (err: any) {
+        if (err?.message?.includes("insufficient points")) {
+          throw new TRPCError({
+            code: "TOO_MANY_REQUESTS",
+            message: "You have run out of credits",
+          });
+        }
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: err?.message || "Something went wrong",
+        });
+      }
+
+      // Save the user message to the database
+      await prisma.message.create({
+        data: {
+          projectId: input.projectId,
+          content: input.value,
+          role: "USER",
+          type: "RESULT",
+        },
+      });
+
+      // Send the event to Inngest
+      await inngest.send({
+        name: "code-agent/run",
+        data: {
+          value: input.value,
+          projectId: input.projectId,
+        },
+      });
+
+      return { success: true };
+    }),
 });
